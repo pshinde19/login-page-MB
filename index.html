@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Login</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
+	<style>
+		.e-bd{
+			border: 1px solid red;
+		}
+	</style>
+</head>
+<body>
+	<section class="ftco-section">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-12 col-lg-10">
+					<div class="wrap d-md-flex">
+						<div class="img" style="background-image: url('static/images/bg-3.jpg')">
+						</div>
+						<div class="login-wrap p-4 p-md-5">
+							<div class="d-flex">
+								<div class="w-100">
+									<h3 class="mb-4">Log In</h3>
+								</div>
+								<!-- <div class="w-100">
+									<p class="social-media d-flex justify-content-end">
+										<a href="#" class="social-icon d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a>
+										<a href="#" class="social-icon d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a>
+									</p>
+								</div> -->
+							</div>
+							<form action="#" class="signin-form">
+								<div class="form-group mb-3">
+									<label class="label" for="name">Username</label>
+									<input type="text" class="form-control" placeholder="Username" id="username"
+										required>
+								</div>
+								<div class="form-group mb-3">
+									<label class="label" for="password">Password</label>
+									<input type="password" class="form-control" placeholder="Password" id="password"
+										required>
+								</div>
+								<div class="form-group">
+									<button type="submit" id="login" class="form-control btn btn-primary rounded submit px-3">Log
+										In</button>
+								</div>
+								<!-- <div class="form-group d-md-flex">
+		            	<div class="w-50 text-left">
+			            	<label class="checkbox-wrap checkbox-primary mb-0">Remember Me
+									  <input type="checkbox" checked>
+									  <span class="checkmark"></span>
+										</label>
+						</div>
+						<div class="w-50 text-md-right">
+							<a href="#">Forgot Password</a>
+						</div>
+		            </div> -->
+							</form>
+							<span id="errormsg" class="text-center" style="display: none;">Please enter right credentials...! </span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Modal -->
+	<div class="modal fade" id="selectproject" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="selectprojectBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+		  <div class="modal-content">
+			<div class="modal-header " style="background-color: #7432f9;color:white;">
+			  <h6 class="modal-title" id="selectprojectBackdropLabel">Select Project</h6>
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col mx-auto">
+					    <div class="input-group mb-3">
+							<div class="input-group-prepend">
+							  <label class="input-group-text" for="inputGroupSelect01">Project</label>
+							</div>
+							<select class="custom-select" id="sel_proj">
+								
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer p-2">
+			  <button type="button" id="submitproject" class="btn btn-primary btn-sm p-2">Submit</button>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	<script src="{{url_for('static',filename='js/jquery.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/popper.js')}}"></script>
+	<script src="{{url_for('static',filename='js/bootstrap.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/main.js')}}"></script>
+	<script>
+	    // $("#selectproject").modal('show')
+        
+        $("#login").click((e)=>{
+			e.preventDefault()
+			let uname=$("#username").val()
+			let pass=$("#password").val()
+			console.log(uname,pass);
+			var formData = new FormData(); 
+			formData.append('username',uname);
+			formData.append('password',pass);
+			$("#errormsg").hide()
+			$('#username, #password').removeClass('e-bd');
+			$.ajax({
+				url: '/verifylogin',
+				type:'POST',
+				data:formData ,
+				contentType: false,
+				processData: false,
+				success: function(data) {
+				    console.log(data)
+					if(data.msg=='success'){
+						$("#selectproject").modal('show')
+						let proj=['project1','project2','project3']
+						$("#sel_proj").html('')
+						$("#sel_proj").append(`<option value="" selected>Choose...</option>`)
+						for(let i of proj){
+							$("#sel_proj").append(`<option value="${i}">${i}</option>`)
+						}
+						$("#errormsg").hide()
+						$('#username, #password').removeClass('e-bd');
+					}else if(data.user=="right"){
+                        $("#errormsg").show()
+						$('#password').addClass('e-bd');
+					}else if(data.user=="wrong"){
+                        $("#errormsg").show()
+						$('#username, #password').addClass('e-bd');
+					}
+				},
+				error: function(error) {
+				console.error('Error uploading files:', error);
+				}
+			});
+		})
+		$("#submitproject").click((e)=>{
+			let pname=$("#sel_proj").val()
+			if(pname != ""){
+				var formData = new FormData(); 
+				formData.append('pname',pname);
+				$.ajax({
+					url: '/submitproject',
+					type:'POST',
+					data:formData ,
+					contentType: false,
+					processData: false,
+					success: function(msg) {
+						console.log(msg)
+						if(msg == 'success'){
+							window.location.href = 'http://127.0.0.1:5000/mainpage';
+						}else{
+							
+						}
+					},
+					error: function(error) {
+					console.error('Error uploading files:', error);
+					}
+				});
+			}else{
+				window.alert('select project...!')
+			}
+		})
+	</script>
+</body>
+
+</html>
